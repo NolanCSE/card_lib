@@ -99,4 +99,7 @@ def simulate_round(deck, strategy: MississippiStudStrategy, ante=1, joker_mode="
 
     if payout == "push":
         return 0
-    return payout * ante - total_bet
+    elif payout == 0:
+        return -total_bet
+    else:
+        return payout * total_bet
