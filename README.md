@@ -1,26 +1,28 @@
 
 # card_lib
 
-**card_lib** is a modular Python library for simulating and evaluating card games using a standard deck, with full support for Jokers and game-specific hand evaluators.
+**card_lib** is a modular, extensible Python library for simulating card games with a focus on training and strategy analysis. It includes standard deck mechanics, hand evaluators, and a Mississippi Stud simulator with both human training and bot strategy support.
 
 ---
 
 ## ✨ Features
 
 - 🃏 Standard 52-card deck with suit icons (♠ ♥ ♦ ♣)
-- ✅ Support for Jokers in two modes:
-  - `"wild"` — Jokers act as the best possible missing cards
-  - `"dead"` — Jokers are ignored for evaluation
-- 🧠 Built-in poker hand evaluator with wildcard logic
-- ♻️ Shuffle, deal, and draw operations
-- 🔧 Clean architecture for plugging in other game-specific evaluators (e.g., Mississippi Stud)
-- 🧪 Unit tested with extensive coverage
+- ✅ Full Joker support in two modes:
+  - `"wild"` — Jokers act as best possible cards
+  - `"dead"` — Jokers are ignored entirely
+- ♠ Poker hand evaluator
+- ♣ Mississippi Stud evaluator (5-card hand with game-specific rules)
+- 🧠 Mississippi Stud simulator with:
+  - **Interactive training mode** (user makes decisions)
+  - **Automated bot mode** (plug in strategy logic)
+- 🧪 Full test coverage for deck, poker, and stud evaluations
 
 ---
 
 ## 📦 Installation
 
-Clone the repo and install locally in editable mode:
+From the project root:
 
 ```bash
 pip install -e .
@@ -28,7 +30,7 @@ pip install -e .
 
 ---
 
-## 📁 Project Structure
+## 🗂 Project Structure
 
 ```
 card_lib/
@@ -36,13 +38,19 @@ card_lib/
 │   ├── __init__.py
 │   ├── card.py
 │   ├── deck.py
-│   └── evaluators/
-│       ├── __init__.py
-│       └── poker.py
+│   ├── evaluators/
+│   │   ├── __init__.py
+│   │   ├── poker.py
+│   │   └── mississippi.py
+│   └── simulation/
+│       └── mississippi_simulator.py
 ├── tests/
 │   ├── test_poker.py
 │   ├── test_joker_hands.py
-│   └── test_more_joker_cases.py
+│   ├── test_more_joker_cases.py
+│   ├── test_mississippi_stud.py
+│   └── test_mississippi_simulator.py
+├── play_round.py           # Interactive trainer script
 ├── setup.py
 ├── pyproject.toml
 ├── README.md
@@ -51,52 +59,59 @@ card_lib/
 
 ---
 
-## 🧩 Usage
+## 🧩 Example Usage
 
 ```python
-from card_lib import Card, Deck
-from card_lib.evaluators import evaluate_hand
+from card_lib.deck import Deck
+from card_lib.simulation.mississippi_simulator import simulate_round, HumanInputStrategy
 
-# Create a hand with jokers
-hand = [
-    Card("Spades", "10"),
-    Card("Spades", "J"),
-    Card("Spades", "Q"),
-    Card("Joker", "Red"),
-    Card("Joker", "Black")
-]
+deck = Deck()
+deck.shuffle()
 
-# Evaluate hand with jokers treated as wildcards
-print(evaluate_hand(hand, joker_mode="wild"))  # ➜ Royal Flush
-
-# Evaluate with jokers treated as dead cards
-print(evaluate_hand(hand, joker_mode="dead"))  # ➜ High Card
+strategy = HumanInputStrategy()
+profit = simulate_round(deck, strategy)
+print(f"Round complete. Profit/Loss: {profit}")
 ```
+
+For bots:
+
+```python
+from card_lib.simulation.mississippi_simulator import BotStrategy
+
+def simple_strategy(hole_cards, revealed, stage):
+    return 3  # Always bet max
+
+bot = BotStrategy(simple_strategy)
+simulate_round(deck, bot)
+```
+
+---
+
+## 📈 Mississippi Stud Payouts
+
+| Hand                        | Payout (to 1) |
+|-----------------------------|---------------|
+| Royal Flush                 | 500           |
+| Straight Flush              | 100           |
+| Four of a Kind              | 40            |
+| Full House                  | 10            |
+| Flush                       | 6             |
+| Straight                    | 4             |
+| Three of a Kind             | 3             |
+| Two Pair                    | 2             |
+| Pair of Jacks or Better     | 1             |
+| Pair of 6s through 10s      | Push (0)      |
+| All others                  | Loss (-Bet)   |
 
 ---
 
 ## 🧪 Running Tests
 
-From the project root:
+From project root:
 
 ```bash
 python -m unittest discover tests
 ```
-
-Or run an individual test:
-
-```bash
-python -m unittest tests.test_joker_hands
-```
-
----
-
-## 🛠 Future Plans
-
-- Add `evaluate_hand()` for Mississippi Stud and other games
-- Add hand comparison logic (tie-breakers)
-- Optional CLI or GUI frontends
-- Documentation generation (Sphinx)
 
 ---
 
