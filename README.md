@@ -42,8 +42,10 @@ card_lib/
 │   │   ├── __init__.py
 │   │   ├── poker.py
 │   │   └── mississippi.py
-│   └── simulation/
-│       └── mississippi_simulator.py
+│   ├── simulation/
+│   │   └── mississippi_simulator.py
+│   └── utils/
+│       └── mississippi_constants.py
 ├── tests/
 │   ├── test_poker.py
 │   ├── test_joker_hands.py
