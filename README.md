@@ -1,28 +1,53 @@
+
 # card_lib
 
-**card_lib** is a lightweight, modular Python library for simulating and managing standard playing card games. It supports full 52-card decks (♠ ♥ ♦ ♣), optional Jokers, and common card operations such as shuffling, drawing, and dealing.
+**card_lib** is a modular Python library for simulating and evaluating card games using a standard deck, with full support for Jokers and game-specific hand evaluators.
 
 ---
 
 ## ✨ Features
 
-- ✅ Standard 52-card deck with Unicode suit icons
-- 🃏 Optional support for Jokers
-- ♻️ Shuffle, deal, and draw cards
-- 🔧 Easily extendable for any card game (Poker, Blackjack, etc.)
-- 🧪 Unit tested
+- 🃏 Standard 52-card deck with suit icons (♠ ♥ ♦ ♣)
+- ✅ Support for Jokers in two modes:
+  - `"wild"` — Jokers act as the best possible missing cards
+  - `"dead"` — Jokers are ignored for evaluation
+- 🧠 Built-in poker hand evaluator with wildcard logic
+- ♻️ Shuffle, deal, and draw operations
+- 🔧 Clean architecture for plugging in other game-specific evaluators (e.g., Mississippi Stud)
+- 🧪 Unit tested with extensive coverage
 
 ---
 
 ## 📦 Installation
 
-Clone your library and install it locally in **editable mode**:
+Clone the repo and install locally in editable mode:
 
 ```bash
 pip install -e .
 ```
 
-This allows you to edit the code and immediately see the changes reflected.
+---
+
+## 📁 Project Structure
+
+```
+card_lib/
+├── card_lib/
+│   ├── __init__.py
+│   ├── card.py
+│   ├── deck.py
+│   └── evaluators/
+│       ├── __init__.py
+│       └── poker.py
+├── tests/
+│   ├── test_poker.py
+│   ├── test_joker_hands.py
+│   └── test_more_joker_cases.py
+├── setup.py
+├── pyproject.toml
+├── README.md
+└── LICENSE
+```
 
 ---
 
@@ -30,67 +55,51 @@ This allows you to edit the code and immediately see the changes reflected.
 
 ```python
 from card_lib import Card, Deck
+from card_lib.evaluators import evaluate_hand
 
-# Create a new deck
-deck = Deck()
+# Create a hand with jokers
+hand = [
+    Card("Spades", "10"),
+    Card("Spades", "J"),
+    Card("Spades", "Q"),
+    Card("Joker", "Red"),
+    Card("Joker", "Black")
+]
 
-# Draw one card
-card = deck.draw()
-print(card)  # Example: K♣
+# Evaluate hand with jokers treated as wildcards
+print(evaluate_hand(hand, joker_mode="wild"))  # ➜ Royal Flush
 
-# Deal a hand of 5 cards
-hand = deck.deal(5)
-print(hand)  # Example: [10♦, A♠, 5♥, 2♣, Q♠]
-
-# Create a deck with Jokers
-joker_deck = Deck(include_jokers=True)
-print(len(joker_deck))  # 54
-```
-
----
-
-## 🗂 Project Structure
-
-```
-card_lib/
-├── card_lib/
-│   ├── __init__.py      # Package entry point
-│   ├── card.py          # Card class
-│   └── deck.py          # Deck class
-├── tests/
-│   └── test_deck.py     # Unit tests
-├── README.md
-├── setup.py             # Packaging setup
-├── pyproject.toml       # Build configuration
-└── LICENSE              # MIT License
+# Evaluate with jokers treated as dead cards
+print(evaluate_hand(hand, joker_mode="dead"))  # ➜ High Card
 ```
 
 ---
 
 ## 🧪 Running Tests
 
-You can run the unit tests with:
+From the project root:
 
 ```bash
 python -m unittest discover tests
 ```
 
-Or using `pytest`:
+Or run an individual test:
 
 ```bash
-pytest
+python -m unittest tests.test_joker_hands
 ```
+
+---
+
+## 🛠 Future Plans
+
+- Add `evaluate_hand()` for Mississippi Stud and other games
+- Add hand comparison logic (tie-breakers)
+- Optional CLI or GUI frontends
+- Documentation generation (Sphinx)
 
 ---
 
 ## 📃 License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
----
-
-## 🛠️ Future Ideas
-
-- Add `Hand` and `Player` classes
-- Built-in support for games like Poker, War, Blackjack
-- GUI/CLI wrappers for quick games
+MIT License
