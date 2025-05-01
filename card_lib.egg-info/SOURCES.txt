@@ -1,0 +1,12 @@
+LICENSE
+README.md
+pyproject.toml
+setup.py
+card_lib/__init__.py
+card_lib/card.py
+card_lib/deck.py
+card_lib.egg-info/PKG-INFO
+card_lib.egg-info/SOURCES.txt
+card_lib.egg-info/dependency_links.txt
+card_lib.egg-info/top_level.txt
+tests/test_deck.py
