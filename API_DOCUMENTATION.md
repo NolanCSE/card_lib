@@ -77,7 +77,13 @@ Returns:
 Base strategy interface:
 
 ```python
-get_bet(hole_cards, revealed_community_cards, stage) -> int | "fold"
+get_bet(
+    hole_cards: list[Card],
+    revealed_community_cards: list[Card],
+    stage: str,
+    ante: int = 1,
+    current_total: int = 0
+) -> int | "fold"
 ```
 
 ---
