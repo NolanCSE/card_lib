@@ -63,28 +63,29 @@ def get_payout_multiplier(result):
     return 0
 
 
-def simulate_round(deck, strategy: MississippiStudStrategy, ante=1, joker_mode="wild", ap_revealed_community_cards={'3rd': None, '4th': None, '5th': None}):
+def simulate_round(deck, strategy: MississippiStudStrategy, ante=1, joker_mode="wild", ap_revealed_community_cards={'3rd': False, '4th': False, '5th': False}):
     hole_cards = deck.deal(2)
     community_cards = deck.deal(3)
     total_bet = ante
     revealed = []
 
+    peeked_cards = {'3rd': community_cards[0] if ap_revealed_community_cards['3rd'] is True else None, '4th': community_cards[1] if ap_revealed_community_cards['4th'] is True else None, '5th': community_cards[2] if ap_revealed_community_cards['5th'] is True else None}
     # 3rd Street
-    bet = strategy.get_bet(hole_cards, revealed, "3rd", ante, total_bet, ap_revealed_community_cards)
+    bet = strategy.get_bet(hole_cards, revealed, "3rd", ante, total_bet, peeked_cards)
     if bet == "fold":
         return -total_bet
     total_bet += bet
     revealed.append(community_cards[0])
 
     # 4th Street
-    bet = strategy.get_bet(hole_cards, revealed, "4th", ante, total_bet, ap_revealed_community_cards)
+    bet = strategy.get_bet(hole_cards, revealed, "4th", ante, total_bet, peeked_cards)
     if bet == "fold":
         return -total_bet
     total_bet += bet
     revealed.append(community_cards[1])
 
     # 5th Street
-    bet = strategy.get_bet(hole_cards, revealed, "5th", ante, total_bet, ap_revealed_community_cards)
+    bet = strategy.get_bet(hole_cards, revealed, "5th", ante, total_bet, peeked_cards)
     if bet == "fold":
         return -total_bet
     total_bet += bet
