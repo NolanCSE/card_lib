@@ -10,10 +10,11 @@ class MississippiStudStrategy:
 
 
 class HumanInputStrategy(MississippiStudStrategy):
-    def get_bet(self, hole_cards, revealed_community_cards, stage, ante=1, current_total=0):
+    def get_bet(self, hole_cards, revealed_community_cards, stage, ante=1, current_total=0, ap_revealed_community_cards={'3rd': None, '4th': None, '5th': None}):
         print(f"\n🟨 Stage: {stage} Street")
         print(f"🎴 Hole Cards: {hole_cards}")
         print(f"🂠 Community Cards Revealed: {revealed_community_cards}")
+        print(f"🂠 AP Community Cards Revealed: {ap_revealed_community_cards}") if 1 in [1 for k, v in ap_revealed_community_cards.items() if v is not None] else None
         print(f"💰 Ante: {ante} | Total Bet So Far: {current_total}")
         while True:
             choice = input(f"Enter bet (1x, 3x) or 'f' to fold: ").strip()
@@ -28,7 +29,7 @@ class BotStrategy(MississippiStudStrategy):
     def __init__(self, decision_fn):
         self.decision_fn = decision_fn
 
-    def get_bet(self, hole_cards, revealed_community_cards, stage, ante=1, current_total=0):
+    def get_bet(self, hole_cards, revealed_community_cards, stage, ante=1, current_total=0, ap_revealed_community_cards=None):
         return self.decision_fn(hole_cards, revealed_community_cards, stage)
 
 
@@ -62,28 +63,28 @@ def get_payout_multiplier(result):
     return 0
 
 
-def simulate_round(deck, strategy: MississippiStudStrategy, ante=1, joker_mode="wild"):
+def simulate_round(deck, strategy: MississippiStudStrategy, ante=1, joker_mode="wild", ap_revealed_community_cards={'3rd': None, '4th': None, '5th': None}):
     hole_cards = deck.deal(2)
     community_cards = deck.deal(3)
     total_bet = ante
     revealed = []
 
     # 3rd Street
-    bet = strategy.get_bet(hole_cards, revealed, "3rd", ante, total_bet)
+    bet = strategy.get_bet(hole_cards, revealed, "3rd", ante, total_bet, ap_revealed_community_cards)
     if bet == "fold":
         return -total_bet
     total_bet += bet
     revealed.append(community_cards[0])
 
     # 4th Street
-    bet = strategy.get_bet(hole_cards, revealed, "4th", ante, total_bet)
+    bet = strategy.get_bet(hole_cards, revealed, "4th", ante, total_bet, ap_revealed_community_cards)
     if bet == "fold":
         return -total_bet
     total_bet += bet
     revealed.append(community_cards[1])
 
     # 5th Street
-    bet = strategy.get_bet(hole_cards, revealed, "5th", ante, total_bet)
+    bet = strategy.get_bet(hole_cards, revealed, "5th", ante, total_bet, ap_revealed_community_cards)
     if bet == "fold":
         return -total_bet
     total_bet += bet
