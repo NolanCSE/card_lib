@@ -5,7 +5,7 @@ from card_lib.evaluators.mississippi import evaluate_mississippi_stud_hand
 
 
 class MississippiStudStrategy:
-    def get_bet(self, hole_cards, revealed_community_cards, stage, ante=1, current_total=0):
+    def get_bet(self, hole_cards, revealed_community_cards, stage, ante=1, current_total=0, ap_revealed_community_cards={'3rd': None, '4th': None, '5th': None}):
         raise NotImplementedError("This method must be implemented by subclasses.")
 
 
