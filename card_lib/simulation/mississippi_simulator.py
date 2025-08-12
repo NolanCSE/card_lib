@@ -108,6 +108,11 @@ def simulate_round(deck, strategy: MississippiStudStrategy, ante=1, joker_mode="
 
     final_hand = hole_cards + revealed
     result = evaluate_mississippi_stud_hand(final_hand, joker_mode)
+    # TEMP DEBUG: print a sample of results to inspect
+    import random
+    if random.random() < 0.001: #1 in 1000 chance to print
+        print(f"DEBUG: Final Hand: {final_hand} -> evaluator says: {result}")
+        
     if isinstance(strategy, HumanInputStrategy):
         print(f"\n🏁 Final Hand: {final_hand}")
         print(f"🃏 Hand Result: {result}")
