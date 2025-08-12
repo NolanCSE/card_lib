@@ -33,26 +33,30 @@ class BotStrategy(MississippiStudStrategy):
         return self.decision_fn(hole_cards, revealed_community_cards, stage)
 
 import re
-_PAIR_WORD_TO_RANK = {
-    "6":"6","6s":"6","seven":"7","sevens":"7","7":"7","7s":"7",
-    "eight":"8","eights":"8","8":"8","8s":"8",
-    "nine":"9","nines":"9","9":"9","9s":"9",
-    "10":"10","10s":"10",
-    "jack":"J","jacks":"J","queen":"Q","queens":"Q",
-    "king":"K","kings":"K","ace":"A","aces":"A"
+PAIR_WORD_TO_RANK = {
+    "6": "6", "6s": "6",
+    "7": "7", "7s": "7",
+    "8": "8", "8s": "8",
+    "9": "9", "9s": "9",
+    "10": "10", "10s": "10",
+    "jack": "J", "jacks": "J",
+    "queen": "Q", "queens": "Q",
+    "king": "K", "kings": "K",
+    "ace": "A", "aces": "A",
 }
-_RANK_STRENGTH = {"6":6,"7":7,"8":8,"9":9,"10":10,"J":11,"Q":12,"K":13,"A":14}
+
+RANK_STRENGTH = {"6":6,"7":7,"8":8,"9":9,"10":10,"J":11,"Q":12,"K":13,"A":14}
 
 def get_payout_multiplier(result):
     table = {
-        "royal flush": 500,
-        "straight flush": 100,
-        "four of a kind": 40,
-        "full house": 10,
-        "flush": 6,
-        "straight": 4,
-        "three of a kind": 3,
-        "two pair": 2,
+        "Royal Flush": 500,
+        "Straight Flush": 100,
+        "Four of a Kind": 40,
+        "Full House": 10,
+        "Flush": 6,
+        "Straight": 4,
+        "Three of a Kind": 3,
+        "Two Pair": 2,
     }
 
     # Normalize
@@ -60,21 +64,22 @@ def get_payout_multiplier(result):
 
     # Exact tabled wins
     for name, mult in table.items():
-        if name in s:
+        if name.lower() in s:
             return mult
 
     # Pair handling (win/push/loss by rank)
     m = re.search(r"pair of\s+([a-z0-9]+)s?", s)
     if m:
         word = m.group(1)
-        r = _PAIR_WORD_TO_RANK.get(word)
-        if r:
-            v = _RANK_STRENGTH[r]
-            if v >= 11:
-                return 1       # Jacks or better
-            if 6 <= v <= 10:
-                return "push"  # 6s–10s
-            return 0           # <6
+        r = PAIR_WORD_TO_RANK.get(word, None)
+        if r is None:
+            return 0  # be conservative
+        if RANK_STRENGTH[r] >= 11:
+            return 1  # Jacks or better
+        if 6 <= RANK_STRENGTH[r] <= 10:
+            return "push"  # 6s–10s
+        return 0  # <6
+
     return 0
 
 
