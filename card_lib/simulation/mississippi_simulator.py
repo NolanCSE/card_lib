@@ -32,33 +32,53 @@ class BotStrategy(MississippiStudStrategy):
     def get_bet(self, hole_cards, revealed_community_cards, stage, ante=1, current_total=0, ap_revealed_community_cards=None):
         return self.decision_fn(hole_cards, revealed_community_cards, stage)
 
+import re
+PAIR_WORD_TO_RANK = {
+    "6": "6", "6s": "6",
+    "7": "7", "7s": "7",
+    "8": "8", "8s": "8",
+    "9": "9", "9s": "9",
+    "10": "10", "10s": "10",
+    "jack": "J", "jacks": "J",
+    "queen": "Q", "queens": "Q",
+    "king": "K", "kings": "K",
+    "ace": "A", "aces": "A",
+}
+
+RANK_STRENGTH = {"6":6,"7":7,"8":8,"9":9,"10":10,"J":11,"Q":12,"K":13,"A":14}
 
 def get_payout_multiplier(result):
     table = {
-        "Win: Royal Flush": 500,
-        "Win: Straight Flush": 100,
-        "Win: Four of a Kind": 40,
-        "Win: Full House": 10,
-        "Win: Flush": 6,
-        "Win: Straight": 4,
-        "Win: Three of a Kind": 3,
-        "Win: Two Pair": 2,
+        "Royal Flush": 500,
+        "Straight Flush": 100,
+        "Four of a Kind": 40,
+        "Full House": 10,
+        "Flush": 6,
+        "Straight": 4,
+        "Three of a Kind": 3,
+        "Two Pair": 2,
     }
 
-    for pattern, multiplier in table.items():
-        if result.startswith(pattern):
-            return multiplier
+    # Normalize
+    s = result.strip().lower()
 
-    if "Pair of" in result:
-        rank = result.split("Pair of ")[1].split("s")[0]
-        rank_order = {"6": 6, "7": 7, "8": 8, "9": 9, "10": 10,
-                      "J": 11, "Q": 12, "K": 13, "A": 14}
-        if rank in rank_order:
-            val = rank_order[rank]
-            if val >= 11:
-                return 1  # Jacks or better
-            elif 6 <= val <= 10:
-                return "push"  # Push: no payout, no loss
+    # Exact tabled wins
+    for name, mult in table.items():
+        if name.lower() in s:
+            return mult
+
+    # Pair handling (win/push/loss by rank)
+    m = re.search(r"pair of\s+([a-z0-9]+)s?", s)
+    if m:
+        word = m.group(1)
+        r = PAIR_WORD_TO_RANK.get(word, None)
+        if r is None:
+            return 0  # be conservative
+        if RANK_STRENGTH[r] >= 11:
+            return 1  # Jacks or better
+        if 6 <= RANK_STRENGTH[r] <= 10:
+            return "push"  # 6s–10s
+        return 0  # <6
 
     return 0
 
@@ -100,8 +120,8 @@ def simulate_round(deck, strategy: MississippiStudStrategy, ante=1, joker_mode="
     payout = get_payout_multiplier(result)
 
     if payout == "push":
-        return 0
+        return 0, total_bet
     elif payout == 0:
-        return -total_bet
+        return -total_bet, total_bet
     else:
-        return payout * total_bet
+        return payout * total_bet, total_bet
