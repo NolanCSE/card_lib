@@ -43,7 +43,20 @@ _PAIR_WORD_TO_RANK = {
 }
 _RANK_STRENGTH = {"6":6,"7":7,"8":8,"9":9,"10":10,"J":11,"Q":12,"K":13,"A":14}
 
-def get_payout_multiplier(result):
+def get_payout_multiplier(result: str):
+    """
+    Returns:
+      int      -> multiplier per bet (e.g., 6 for Flush, 1 for Jacks+ pair)
+      "push"   -> push (6s–10s pair)
+      0        -> loss
+    """
+    s = result.strip().lower()
+
+    # Fast path: explicit "loss"
+    if s.startswith("loss"):
+        return 0
+
+    # Non-pair made hands (match anywhere to be robust to prefixes)
     table = {
         "royal flush": 500,
         "straight flush": 100,
@@ -54,27 +67,35 @@ def get_payout_multiplier(result):
         "three of a kind": 3,
         "two pair": 2,
     }
-
-    # Normalize
-    s = result.strip().lower()
-
-    # Exact tabled wins
     for name, mult in table.items():
         if name in s:
             return mult
 
-    # Pair handling (win/push/loss by rank)
-    m = re.search(r"pair of\s+([a-z0-9]+)s?", s)
+    # Pairs — evaluator emits things like:
+    # "Win: Pair of 9s (6s through 10s)"  -> push
+    # "Win: Pair of Ks (Jacks or Better)" -> 1:1
+    # Also handle "pair of jacks", "pair of k", "pair of ks", etc.
+    # Failsafe: if the evaluator includes the parenthetical, use it.
+    if "(6s through 10s)" in s:
+        return "push"
+    if "(jacks or better)" in s:
+        return 1
+
+    m = re.search(r"pair of\s+([0-9]+|[jqka])s?", s)
     if m:
-        word = m.group(1)
-        r = _PAIR_WORD_TO_RANK.get(word)
-        if r:
-            v = _RANK_STRENGTH[r]
-            if v >= 11:
-                return 1       # Jacks or better
-            if 6 <= v <= 10:
-                return "push"  # 6s–10s
-            return 0           # <6
+        token = m.group(1)  # e.g., "9", "10", "j", "q", "k", "a"
+        # map to rank strength
+        if token.isdigit():
+            v = int(token)
+        else:
+            v = {"j": 11, "q": 12, "k": 13, "a": 14}[token]
+        if v >= 11:
+            return 1
+        if 6 <= v <= 10:
+            return "push"
+        return 0
+
+    # Default: treat as loss
     return 0
 
 
@@ -112,7 +133,7 @@ def simulate_round(deck, strategy: MississippiStudStrategy, ante=1, joker_mode="
     import random
     if random.random() < 0.001: #1 in 1000 chance to print
         print(f"DEBUG: Final Hand: {final_hand} -> evaluator says: {result}")
-        
+
     if isinstance(strategy, HumanInputStrategy):
         print(f"\n🏁 Final Hand: {final_hand}")
         print(f"🃏 Hand Result: {result}")
