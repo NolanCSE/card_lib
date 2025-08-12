@@ -93,21 +93,21 @@ def simulate_round(deck, strategy: MississippiStudStrategy, ante=1, joker_mode="
     # 3rd Street
     bet = strategy.get_bet(hole_cards, revealed, "3rd", ante, total_bet, peeked_cards)
     if bet == "fold":
-        return -total_bet
+        return -total_bet, total_bet
     total_bet += bet
     revealed.append(community_cards[0])
 
     # 4th Street
     bet = strategy.get_bet(hole_cards, revealed, "4th", ante, total_bet, peeked_cards)
     if bet == "fold":
-        return -total_bet
+        return -total_bet, total_bet
     total_bet += bet
     revealed.append(community_cards[1])
 
     # 5th Street
     bet = strategy.get_bet(hole_cards, revealed, "5th", ante, total_bet, peeked_cards)
     if bet == "fold":
-        return -total_bet
+        return -total_bet, total_bet
     total_bet += bet
     revealed.append(community_cards[2])
 
