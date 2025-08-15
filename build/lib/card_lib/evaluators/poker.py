@@ -24,7 +24,7 @@ def generate_minimal_filler(existing_hand):
         """Check if the hand can form a low straight (A2345)."""
         ranks = [RANK_ORDER[card.rank] for card in hand if card.suit != "Joker"]
         ranks.sort()
-        if (max(ranks) == 14 and max(ranks[:-1]) == 5) or (max(ranks) == 6 and min(ranks) == 3) or (max(ranks) == 5 and min(ranks) == 2):
+        if (max(ranks) == 14 and max(ranks[:-1]) == 5) or (max(ranks) == 6 and min(ranks) == 3) or (max(ranks) == 5 and min(ranks) == 2) or (max(ranks) == 5 and min(ranks) == 3):
             return True
         return False
     
