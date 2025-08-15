@@ -20,11 +20,26 @@ HAND_RANKS = [
 ]
 
 def generate_minimal_filler(existing_hand):
+    def is_low_straight_candidate(hand):
+        """Check if the hand can form a low straight (A2345)."""
+        ranks = [RANK_ORDER[card.rank] for card in hand if card.suit != "Joker"]
+        ranks.sort()
+        if max(ranks) == 14 and max(ranks[:-1]) == 5:
+            return True
+        return False
+    
     # Generate "lowest possible" dummy cards that don't affect the hand
     # e.g., 2 of different suits/ranks that won't create a pair, flush, or straight
     existing_ranks = {card.rank for card in existing_hand}
     existing_suits = {card.suit for card in existing_hand}
     fillers = []
+
+    if is_low_straight_candidate(existing_hand):
+        # If we have a low straight candidate, fill with low ranks
+        for rank in ['7', '8', '9', '10']:
+            if rank not in existing_ranks:
+                fillers.append(Card('Hearts', rank))
+
     for suit in SUITS:
         for rank in RANK_ORDER:
             if rank not in existing_ranks and suit not in existing_suits:
