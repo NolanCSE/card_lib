@@ -34,11 +34,18 @@ def generate_minimal_filler(existing_hand):
     existing_suits = {card.suit for card in existing_hand}
     fillers = []
 
+    filler_suit = 'Hearts'
+
     if is_low_straight_candidate(existing_hand):
         # If we have a low straight candidate, fill with low ranks
         for rank in ['8', '9', '10', 'J']:
             if rank not in existing_ranks:
-                fillers.append(Card('Hearts', rank))
+                if len(existing_suits) == 1:
+                    for suit in SUITS:
+                        if suit not in existing_suits:
+                            filler_suit = suit
+                            break
+                fillers.append(Card(filler_suit, rank))
 
     for suit in SUITS:
         for rank in RANK_ORDER:
